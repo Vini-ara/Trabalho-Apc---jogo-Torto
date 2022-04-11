@@ -36,9 +36,11 @@ int main() {
 
         if(len > 9 || len < 4) continue; 
         
-        for(int i = 0; i < len; ++i) 
+        for(int i = 0; i < len; ++i) {
+            if(word[i] == '-') 
             word[i] = tolower(dictionary[index][i]);
-            
+        }
+
         word[len] = '\0'; 
 
         fprintf(out, "%s\n", word); 

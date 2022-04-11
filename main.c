@@ -136,8 +136,9 @@ void getAllWordsString(char ** out, char table[][4], int y, int x) {
     } 
 }
 
-void getValidWords(char ** dictionary, char table[][4], int y, int x, int searchEnd) {
-    char ** possibleWords; 
+void getValidWords(char ** out, char ** dictionary, char table[][4], int y, int x, int searchEnd, int * validWordsCounter) {
+    int validLen = 0; 
+    char ** possibleWords;
 
     possibleWords  = (char **) calloc(99000, sizeof(char *));
     for(int i = 0; i < 99000; ++i)
@@ -145,50 +146,74 @@ void getValidWords(char ** dictionary, char table[][4], int y, int x, int search
 
     getAllWordsString(possibleWords, table, y, x); 
     
+
     for(int i = 0; i < 99000; i++) {
+        if(*validWordsCounter == 100) break;
+
         int wordIndexDic = stringBinarySearch(dictionary, 0, searchEnd, possibleWords[i]); 
+
         if(wordIndexDic == -1) continue; 
-        printf("%s\n", dictionary[wordIndexDic]); 
+
+        strcpy(out[*validWordsCounter], dictionary[wordIndexDic]);
+        
+        *validWordsCounter += 1;
     }
+ 
 
     for(int i = 0; i < 99000; ++i) 
         free(possibleWords[i]);
     free(possibleWords); 
 } 
 
-int main() {
-    char table[6][4] = {{"aof"}, {"rti"}, {"tir"}, {"vud"}, {"sao"}, {"qeb"}};
-    int y = 0, x = 1, dictionaryLen = 0; 
+void getAllValidWords(char ** validWords, char ** dictionaryWords, char table[][4], int dictionaryLen) {
+    int validWordsCounter = 0;
 
-    char **dictionaryWords;  
+    for(int i = 0; i < 6; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            if(validWordsCounter == 100) break;
+            getValidWords(validWords, dictionaryWords, table, i, j, dictionaryLen, &validWordsCounter); 
+        }
+    }
+}
+
+int main() {
+    char table[6][4] = {{"egf"}, {"uth"}, {"dar"}, {"nui"}, {"sto"}, {"qeu"}};
+    
+    int dictionaryLen = 0; 
+
+    char ** dictionaryWords;
+    char ** validWords; 
 
     dictionaryWords = (char **) calloc(110000, sizeof(char *)); 
     for(int i = 0; i < 110000; ++i)
         dictionaryWords[i] = (char *) calloc(10, sizeof(char)); 
-    
+
+    validWords = (char **) calloc(100, sizeof(char *));
+    for(int i = 0; i < 100; ++i) 
+        validWords[i] = (char *) calloc(10, sizeof(char));
+
     FILE* dictionary; 
 
     dictionary = fopen("dicionarioFinal.txt", "rt"); 
 
     if(dictionary == NULL) {
         printf("Erro na abertura do dicionário\n"); 
-        return -1; 
+        return -1;
     } 
 
     while(fscanf(dictionary, "%s", dictionaryWords[dictionaryLen]) != EOF)
         dictionaryLen++; 
 
-    for(int i = 0; i < 6; ++i) {
-        for(int j = 0; j < 3; ++j) {
-            getValidWords(dictionaryWords, table, i, j, dictionaryLen); 
-        }
-    }
+    getAllValidWords(validWords, dictionaryWords, table, dictionaryLen);
 
+    for(int i = 0; i < 100; ++i) {
+        free(validWords[i]);
+    }
+    free(validWords);
+    
     for(int i = 0; i < 110000; ++i)
         free(dictionaryWords[i]); 
     free(dictionaryWords); 
 
-    return 0; 
+    return 0;  
 }
-
-
