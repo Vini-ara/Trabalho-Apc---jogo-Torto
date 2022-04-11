@@ -1,6 +1,7 @@
 #include <stdio.h> 
 #include <string.h> 
 #include <stdlib.h> 
+#include <unistd.h> 
 
 _Bool isvogal(char c) {
     if(c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') 
@@ -46,6 +47,28 @@ char * getLastChar(char* word[10], int* len) {
     return NULL; 
 } 
 
+int stringBinarySearch(char ** dictionary, int a, int b, char * word) {
+    if(b >= a) {
+        int mid = a + (b - a) / 2; 
+
+        int lenA = strlen(dictionary[mid]); 
+        int lenB = strlen(word); 
+
+        int n = lenA > lenB ? lenB : lenA;
+
+        if(!strcmp(dictionary[mid], word)) 
+            return mid;
+
+        if(strncmp(word, dictionary[mid], n) < 0) {
+            return stringBinarySearch(dictionary, a, mid - 1, word); 
+        }
+
+        return stringBinarySearch(dictionary, mid + 1, b, word); 
+    } 
+
+    return -1; 
+} 
+
 void getNextWords(char *words[100000][10], char table[6][4], int index, int* listLen, int* wordLen) {
     char * lastChar = getLastChar(words[index], wordLen); 
 
@@ -80,6 +103,11 @@ void getNextWords(char *words[100000][10], char table[6][4], int index, int* lis
 
 void getAllWordsPointer(char * out[][10],  char table[][4], int y, int x) { 
     int index = 0, wordLen = 0, listLen = 0;
+    
+    for(int i = 0; i <= 99000; ++i) {
+        for(int j = 0; j <= 10; ++j) 
+            out[i][j] = NULL; 
+    } 
 
     out[0][0] = &table[y][x]; 
 
@@ -91,8 +119,6 @@ void getAllWordsPointer(char * out[][10],  char table[][4], int y, int x) {
         if(listLen >= 100000 - 100)
             break; 
     }
-
-    return;
 }
 
 void getAllWordsString(char ** out, char table[][4], int y, int x) {
@@ -105,45 +131,41 @@ void getAllWordsString(char ** out, char table[][4], int y, int x) {
             out[i][j] = *pointersList[i][j]; 
             if(pointersList[i][j + 1] == NULL) break; 
         } 
-        if(pointersList[i + 1][0] == NULL) break; 
+        if(pointersList[i + 1][0] == NULL) 
+            break; 
     } 
 }
 
-int stringBinarySearch(char ** dictionary, int a, int b, char * word) {
-    if(b >= a) {
-        int mid = a + (b - a) / 2; 
+void getValidWords(char ** dictionary, char table[][4], int y, int x, int searchEnd) {
+    char ** possibleWords; 
 
-        int lenA = strlen(dictionary[mid]); 
-        int lenB = strlen(word); 
+    possibleWords  = (char **) calloc(99000, sizeof(char *));
+    for(int i = 0; i < 99000; ++i)
+        possibleWords[i] = (char *) calloc(10, sizeof(char)); 
 
-        int n = lenA > lenB ? lenB : lenA;
+    getAllWordsString(possibleWords, table, y, x); 
+    
+    for(int i = 0; i < 99000; i++) {
+        int wordIndexDic = stringBinarySearch(dictionary, 0, searchEnd, possibleWords[i]); 
+        if(wordIndexDic == -1) continue; 
+        printf("%s\n", dictionary[wordIndexDic]); 
+    }
 
-        if(!strncmp(dictionary[mid], word, n))
-            return mid; 
-
-        if(strncmp(dictionary[mid], word, n) < 0) {
-          printf("mid = %s, word = %s\n", dictionary[mid], word);
-            return stringBinarySearch(dictionary, a, mid - 1, word); 
-        }
-
-       printf("mid = %s, word = %s\n", dictionary[mid], word);
-        return stringBinarySearch(dictionary, mid + 1, b, word); 
-    } 
-
-    return -1; 
+    for(int i = 0; i < 99000; ++i) 
+        free(possibleWords[i]);
+    free(possibleWords); 
 } 
 
-
 int main() {
-    char table[6][4] = {{"oid"}, {"sla"}, {"tir"}, {"beu"}, {"sde"}, {"ita"}};
+    char table[6][4] = {{"aof"}, {"rti"}, {"tir"}, {"vud"}, {"sao"}, {"qeb"}};
+    int y = 0, x = 1, dictionaryLen = 0; 
 
-    int firstLetterIndex = 0, finalLetterIndex = 0; 
-
-    char **wordsPossibleByPos; 
     char **dictionaryWords;  
 
-    char validWords[30][10]; 
-
+    dictionaryWords = (char **) calloc(110000, sizeof(char *)); 
+    for(int i = 0; i < 110000; ++i)
+        dictionaryWords[i] = (char *) calloc(10, sizeof(char)); 
+    
     FILE* dictionary; 
 
     dictionary = fopen("dicionarioFinal.txt", "rt"); 
@@ -152,44 +174,21 @@ int main() {
         printf("Erro na abertura do dicionário\n"); 
         return -1; 
     } 
- 
-    wordsPossibleByPos  = (char **) calloc(99000, sizeof(char *)); 
-    dictionaryWords = (char **) calloc(110000, sizeof(char *)); 
 
-    for(int i = 0; i < 99000; ++i)
-        wordsPossibleByPos[i] = (char *) calloc(10, sizeof(char)); 
-    
-    for(int i = 0; i < 110000; ++i)
-        dictionaryWords[i] = (char *) calloc(10, sizeof(char)); 
+    while(fscanf(dictionary, "%s", dictionaryWords[dictionaryLen]) != EOF)
+        dictionaryLen++; 
 
-    getAllWordsString(wordsPossibleByPos, table, 1, 0); 
-    
-    int index = 0; 
-    for(int i = 0; i < 99000; 
-    while(fscanf(dictionary, "%s", dictionaryWords[index]) != EOF) {
-        if(dictionaryWords[index][0] == table[1][0] && firstLetterIndex == 0)
-            firstLetterIndex = index; 
-        if(tolower(dictionaryWords[index][0]) != table[1][0] && firstLetterIndex && !finalLetterIndex)
-            finalLetterIndex = index; 
+    for(int i = 0; i < 6; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            getValidWords(dictionaryWords, table, i, j, dictionaryLen); 
+        }
+    }
 
-        index++; 
-    } 
-    
- //   for(int i = 0; i < 99000; i++) {
-//        int wordIndexDic = stringBinarySearch(dictionaryWords, 0, 100000, wordsPossibleByPos[i]); 
-
-//        printf("index = %d\n", wordIndexDic);  
-  //      if(wordIndexDic == -1) continue; 
-
-        printf("%s\n", dictionaryWords[wordIndexDic]); 
-  //  } 
-
-    for(int i = 0; i < 99000; ++i) 
-        free(wordsPossibleByPos[i]);
     for(int i = 0; i < 110000; ++i)
         free(dictionaryWords[i]); 
-    free(wordsPossibleByPos); 
     free(dictionaryWords); 
 
     return 0; 
-} 
+}
+
+
