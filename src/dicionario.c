@@ -2,10 +2,10 @@
 #include <string.h> 
 #include <ctype.h> 
 
-int getDictionary(char ** out, int * outLen) {
+int getDictionary(char * filename,char ** out, int * outLen) {
   FILE *inp; 
 
-  inp = fopen("dicionario.txt", "rt");
+  inp = fopen(filename, "rt");
 
   if(inp == NULL) {
     printf("Incapaz de abrir arquivo de entrada\n"); 

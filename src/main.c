@@ -83,7 +83,7 @@ int main() {
     // while(fscanf(dictionary, "%s", dictionaryWords[dictionaryLen]) != EOF)
     //     dictionaryLen++; 
 
-    int err = getDictionary(dictionaryWords, &dictionaryLen);
+    int err = getDictionary("../dicionario.txt",dictionaryWords, &dictionaryLen);
 
     if(err){
         for(int i = 0; i < 110000; ++i)
