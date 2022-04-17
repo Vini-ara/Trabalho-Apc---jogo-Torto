@@ -113,6 +113,11 @@ void getValidWords(char ** out, char ** dictionary, char table[][4], int y, int 
 int getAllValidWords(char ** validWords, char ** dictionaryWords, char table[][4], int dictionaryLen) {
     int validWordsCounter = 0, repeatedWords = 0;
 
+    for(int i = 0; i < 100; ++i) {
+        for(int j = 0; j < 10; ++j)
+            validWords[i][j] = '\0'; 
+    }
+
     for(int i = 0; i < 6; ++i) {
         for(int j = 0; j < 3; ++j) {
             if(validWordsCounter == 100) break;

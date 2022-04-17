@@ -7,25 +7,31 @@
 #include "gamelogic.h"
 #include "dicionario.h"
 
-char tabuleiro [6][4], **validWords; //= {{"rsi"}, {"epn"}, {"ega"}, {"idj"}, {"aoa"}, {"dir"}};
+int ROW, COL; 
+const int RUNNING = 0;
+const int VICTORY = 1; 
+const int EXIT = 2; 
+
+char tabuleiro[6][4], **palavras_validas, **dicionario, **fields; 
 
 typedef struct _cordenadas{
     int x;
     int y;
-}coordenada;
+} coordenada;
+
 coordenada posicao[18]; 
 
 void print_t(char t[6][4], int r, int c) {
-    coordenada posletra;
+    coordenada pos_letra;
     int indice = 0;
     for(int i = 0; i < 6; i++) {
         for(int j = 0; j < 3; j++) {
             mvprintw((r/2) - 5 + i * 2, (c/4) - 5 + 4 * j, "(");
             attron(A_UNDERLINE | A_BOLD); 
             printw("%c", toupper(t[i][j]));
-            posletra.y = (r/2) - 5 + i * 2;
-            posletra.x = (c/4) - 4 + 4 * j;
-            posicao[indice++] = posletra;
+            pos_letra.y = (r/2) - 5 + i * 2;
+            pos_letra.x = (c/4) - 4 + 4 * j;
+            posicao[indice++] = pos_letra;
             attroff(A_UNDERLINE | A_BOLD); 
             printw(")"); 
             if(j != 2) printw("-"); 
@@ -38,95 +44,115 @@ void print_t(char t[6][4], int r, int c) {
 }
 
 void print_fields(int r, int c) {
-    for(int i = 0; i < 15; ++i)
+    for(int i = 0; i < 15; ++i) {
         mvprintw((r - 30)/2 + i * 2, c/2, "%d.", i + 1); 
-    for(int i = 0; i < 15; ++i)
+        for(int j = 0; j < 10; ++j) {
+            attron(A_UNDERLINE); 
+            printw("%c", fields[i][j]); 
+            attroff(A_UNDERLINE);
+        } 
+    }
+    for(int i = 0; i < 15; ++i) {
         mvprintw((r - 30)/2 + i * 2, 3 * (c/4), "%d.", i + 16); 
+        for(int j = 0; j < 10; ++j) {
+            attron(A_UNDERLINE); 
+            printw("%c", fields[i + 15][j]); 
+            attroff(A_UNDERLINE); 
+        }
+    } 
 } 
 
-int main() {
-    int row, col, dictionaryLen = 0, validWordsn; 
-    char **dictionaryWords;
+void alloc() {
+    dicionario = (char **) calloc(110000, sizeof(char *)); 
+    for(int i = 0; i < 110000; ++i)
+        dicionario[i] = (char *) calloc(10, sizeof(char)); 
+
+    palavras_validas = (char **) calloc(100, sizeof(char *));
+    for(int i = 0; i < 100; ++i) 
+        palavras_validas[i] = (char *) calloc(10, sizeof(char));
+
+    fields = (char **) calloc(30, sizeof(char *)); 
+    for(int i = 0; i < 30; ++i) {
+        fields[i] = (char *) calloc(10, sizeof(char)); 
+        memset(fields[i], ' ', 10); 
+    } 
+}
+
+void free_alloc() {
+    for(int i = 0; i < 110000; ++i)
+        free(dicionario[i]);
+    free(dicionario);
+
+    for(int i = 0; i < 100; ++i)
+        free(palavras_validas[i]);
+    free(palavras_validas);
+
+    for(int i = 0; i < 30; ++i)
+        free(fields[i]); 
+    free(fields);
+}  
+
+void init() {
+    initscr(); 
+
+    getmaxyx(stdscr, ROW, COL);
 
     srand(time(NULL));
 
-    initscr(); 
+    start_color();
 
-    start_color(); 
     init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
 
-    raw(); 
-    noecho();
+    noecho(); 
+    keypad(stdscr, TRUE); 
 
-    getmaxyx(stdscr,row,col);
+    alloc(); 
 
-    if(!has_colors()) {
-        endwin(); 
-        printf("Your terminal does not support color\n");
-        return -1; 
-    }
-
-    dictionaryWords = (char **) calloc(110000, sizeof(char *)); 
-    for(int i = 0; i < 110000; ++i)
-        dictionaryWords[i] = (char *) calloc(10, sizeof(char)); 
-
-    validWords = (char **) calloc(100, sizeof(char *));
-    for(int i = 0; i < 100; ++i) 
-        validWords[i] = (char *) calloc(10, sizeof(char));
-
-    //dictionary = fopen("dicionarioFinal.txt", "rt"); 
-
-    // if(dictionary == NULL) {
-    //     printf("Erro na abertura do dicionário\n"); 
-    //     return -1;
-    // } 
-    // while(fscanf(dictionary, "%s", dictionaryWords[dictionaryLen]) != EOF)
-    //     dictionaryLen++; 
-
-    int err = getDictionary("../dicionario.txt",dictionaryWords, &dictionaryLen);
-
-    if(err){
-        for(int i = 0; i < 110000; ++i)
-            free(dictionaryWords[i]);
-        free(dictionaryWords);
-
-        for(int i = 0; i < 100; ++i)
-            free(validWords[i]);
-        free(validWords);
-
-        return -1; 
-    }
-
-    do { 
-        for(int i = 0; i < 100; ++i) {
-            for(int j = 0; j < 10; ++j)
-                validWords[i][j] = '\0'; 
-        } 
-        createTable(tabuleiro); 
-        validWordsn = getAllValidWords(validWords, dictionaryWords, tabuleiro, dictionaryLen);
-    } while(validWordsn < 30); 
-
-    print_t(tabuleiro, row, col);
-    print_fields(row, col);
+    mvprintw(ROW / 2, COL / 2, "HEY"); 
+    curs_set(0); 
+    refresh();  
+}
 
 
-    getch();
+void close() {
+    getch(); 
+
+    free_alloc(); 
 
     endwin(); 
+} 
 
-for(int i = 0; i < validWordsn; ++i) 
-    printf("%s\n", validWords[i]);
-// for(int x = 0; x < 18; x++){
-//     printf("y = %d x = %d\n", posicao[x].y, posicao[x].x);
-// }
+int main() {
+    int dicionario_tamanho = 0, palavras_validas_qnt; 
+    int estado = RUNNING; 
 
-    for(int i = 0; i < 110000; ++i)
-        free(dictionaryWords[i]);
-    free(dictionaryWords);
+    init();
 
-    for(int i = 0; i < 100; ++i)
-        free(validWords[i]);
-    free(validWords);
+    int err = getDictionary("../dicionario.txt", dicionario, &dicionario_tamanho);
+
+    if(err) close(); 
+
+    do { 
+        createTable(tabuleiro); 
+        palavras_validas_qnt = getAllValidWords(palavras_validas, dicionario, tabuleiro, dicionario_tamanho);
+    } while(palavras_validas_qnt < 30); 
+
+    clear(); 
+    curs_set(1); 
     
+    while(estado != VICTORY && estado != EXIT) {
+        print_t(tabuleiro, ROW, COL);
+        print_fields(ROW, COL);
+
+        char c = getch(); 
+
+        if(c == 27) estado = EXIT; 
+
+        refresh(); 
+    }
+
+    close(); 
+
     return 0;  
 }
