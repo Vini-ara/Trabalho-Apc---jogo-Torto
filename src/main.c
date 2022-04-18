@@ -129,7 +129,7 @@ int main() {
 
     init();
 
-    int err = getDictionary("../dicionario.txt", dicionario, &dicionario_tamanho);
+    int err = getDictionary("./dicionario.txt", dicionario, &dicionario_tamanho);
 
     if(err) close(); 
 
