@@ -123,9 +123,31 @@ void init() {
 
     alloc(); 
 
-    mvprintw(ROW / 2, COL / 2, "HEY"); 
+    attron(A_BOLD | A_BLINK);
+    attron(COLOR_PAIR(1));
+    mvprintw((ROW * 0.35), (COL / 2)-3, "REGRAS");
+    attroff(COLOR_PAIR(1));
+    mvprintw((ROW * 0.35) + 2, (COL / 2)-26, "+ Deve-se formar palavras seguindo os mesmos sentidos");
+    mvprintw((ROW * 0.35) + 3, (COL / 2)-26, "+ Proibido pular e cruzar letras");
+    mvprintw((ROW * 0.35) + 4, (COL / 2)-26, "+ Proibido repetir a mesma letra que foi utilizada no click anterior");
+    mvprintw((ROW * 0.35) + 5, (COL / 2)-26, "+ O jogador tem que encontrar as trinta palavras");
+    mvprintw((ROW * 0.35) + 6, (COL / 2)-26, "+ Cada palavra tem de quatro a nove letras");    
+    attroff(A_BOLD | A_BLINK);
+
     curs_set(0); 
     refresh();  
+}
+
+void press_enter(){
+    keypad(stdscr, TRUE);
+
+    attron(A_BOLD | A_BLINK); 
+    mvprintw((ROW * 0.35)+10, (COL / 2)-7, "Pressione ENTER");
+    attroff(A_BOLD | A_BLINK);
+
+    int ch = getch();
+    while(ch != 10){
+    }
 }
 
 
@@ -152,6 +174,8 @@ int main() {
         createTable(tabuleiro); 
         palavras_validas_qnt = getAllValidWords(palavras_validas, dicionario, tabuleiro, dicionario_tamanho);
     } while(palavras_validas_qnt < 30); 
+
+    press_enter();
 
     clear(); 
     curs_set(1); 
