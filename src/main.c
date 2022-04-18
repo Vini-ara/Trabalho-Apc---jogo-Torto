@@ -7,7 +7,7 @@
 #include "gamelogic.h"
 #include "dicionario.h"
 
-int ROW, COL; 
+int ROW, COL, cont = 0; 
 const int RUNNING = 0;
 const int VICTORY = 1; 
 const int EXIT = 2; 
@@ -67,8 +67,10 @@ void print_fields(int r, int c) {
 void check_click(int x, int y){
     for(int j = 0; j < 18; j++){
         if(posicao[j].x == x && posicao[j].y == y){
-            printw("%c\n", toupper(posicao[j].letra));
-        }
+            //printw("%c\n", toupper(posicao[j].letra));
+            fields[0][cont] = toupper(posicao[j].letra);
+            cont = cont < 9 ? cont+1 : 0;
+        } 
     }
 }
 
