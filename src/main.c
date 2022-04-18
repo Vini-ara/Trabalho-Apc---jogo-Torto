@@ -17,6 +17,7 @@ char tabuleiro[6][4], **palavras_validas, **dicionario, **fields;
 typedef struct _cordenadas{
     int x;
     int y;
+    char letra;
 } coordenada;
 
 coordenada posicao[18]; 
@@ -31,6 +32,7 @@ void print_t(char t[6][4], int r, int c) {
             printw("%c", toupper(t[i][j]));
             pos_letra.y = (r/2) - 5 + i * 2;
             pos_letra.x = (c/4) - 4 + 4 * j;
+            pos_letra.letra = t[i][j];
             posicao[indice++] = pos_letra;
             attroff(A_UNDERLINE | A_BOLD); 
             printw(")"); 
@@ -61,6 +63,14 @@ void print_fields(int r, int c) {
         }
     } 
 } 
+
+void check_click(int x, int y){
+    for(int j = 0; j < 18; j++){
+        if(posicao[j].x == x && posicao[j].y == y){
+            printw("%c\n", toupper(posicao[j].letra));
+        }
+    }
+}
 
 void alloc() {
     dicionario = (char **) calloc(110000, sizeof(char *)); 
@@ -107,6 +117,8 @@ void init() {
     noecho(); 
     keypad(stdscr, TRUE); 
 
+    mousemask(BUTTON1_CLICKED, NULL);
+
     alloc(); 
 
     mvprintw(ROW / 2, COL / 2, "HEY"); 
@@ -121,7 +133,8 @@ void close() {
     free_alloc(); 
 
     endwin(); 
-} 
+}
+
 
 int main() {
     int dicionario_tamanho = 0, palavras_validas_qnt; 
@@ -145,7 +158,18 @@ int main() {
         print_t(tabuleiro, ROW, COL);
         print_fields(ROW, COL);
 
-        char c = getch(); 
+        char c = getch();
+        MEVENT event;
+
+        if(KEY_MOUSE){ 
+            if(getmouse(&event) == OK) 
+            { 
+                if(event.bstate & BUTTON1_CLICKED)
+                { 
+                    check_click(event.x, event.y); 
+                } 
+            } 
+        } 
 
         if(c == 27) estado = EXIT; 
 
