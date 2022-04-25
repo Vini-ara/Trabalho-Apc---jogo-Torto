@@ -158,6 +158,7 @@ void press_enter(){
 
     int ch = getch();
     while(ch != 10){
+        ch = getch();
     }
 }
 
