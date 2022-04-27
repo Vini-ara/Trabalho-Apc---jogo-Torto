@@ -327,6 +327,13 @@ int main() {
                 }  
             }
 
+            for(int j = 0; j < dicionario_tamanho; j++){
+                if(!strcmp(dicionario[j], gabarito)){
+                    deubom = 1;
+                    memset(dicionario[j], '\0', 10);  
+                }  
+            }
+
             memset(gabarito, '\0', gabarit);
             gabarit = 0;
 
