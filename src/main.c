@@ -150,9 +150,9 @@ void gera_anagrama(int dicionario_tamanho){
 void press_enter(){
     keypad(stdscr, TRUE);
 
-    attron(A_BOLD | A_BLINK); 
+    attron(A_BOLD); 
     mvprintw((ROW * 0.35)+10, (COL / 2) - 7, "Pressione");
-    attron(COLOR_PAIR(2));
+    attron(COLOR_PAIR(2) | A_BLINK);
     mvprintw((ROW * 0.35)+10, (COL / 2) + 3, "ENTER");
     attroff(A_BOLD | A_BLINK | COLOR_PAIR(2));
 
@@ -359,9 +359,9 @@ int main() {
             
             attron(A_BOLD);
             mvprintw((ROW/2) + 2, (COL/2) - 25, "Caso queira desafiar-se novamente, pressione");
-            attron(COLOR_PAIR(2));
+            attron(COLOR_PAIR(2) | A_BLINK);
             mvprintw((ROW/2) + 2, (COL/2) + 20, "ENTER");
-            attroff(A_BOLD | COLOR_PAIR(2));
+            attroff(A_BOLD | COLOR_PAIR(2) | A_BLINK);
 
             int ch = getch();
             if(ch == 10){
