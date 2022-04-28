@@ -345,7 +345,7 @@ int main() {
 
         }
         
-        if(pontos == 29){
+        if(pontos == 30){
             estado = VICTORY;
 
             clear();
@@ -393,6 +393,7 @@ int main() {
             clear();
             refresh();
         }
+        
 
         else if(c == 27) estado = EXIT; 
 
